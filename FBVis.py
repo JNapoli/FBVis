@@ -31,9 +31,9 @@ class FBVis:
         with open(concat_filenm, 'r') as f:
             raw_dat = f.readlines()
             params = self._parse_params(raw_dat)
-            experiment =  
-             
         f.close()
+
+        return 0, params, 0
 
     def _concatenate(self, filenms):
         """
