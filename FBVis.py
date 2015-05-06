@@ -6,9 +6,16 @@ import numpy as np
 import os
 
 class FBVis:
-    def __init__(self, target):
-        self.target = target
+    units = {'Density':'(kg m^-3)',
+             'Enthalpy of Vaporization':'(kJ mol^-1)',
+             'Thermal Expansion Coefficient':'(10^-4 K^-1)',
+             'Isothermal Compressibility':'(10^-6 bar^-1)',
+             'Isobaric Heat Capacity':'(cal mol^-1 K^-1)',
+             'Dielectric Constant':''}
+
+    def __init__(self):
         self.prefix = self._get_prefix()
+        self.properties = self._load_properties()
         self.it_data, self.parameters, self.experiment = self._parse(self.prefix)
 
     def _get_prefix(self):
@@ -24,6 +31,8 @@ class FBVis:
         with open(concat_filenm, 'r') as f:
             raw_dat = f.readlines()
             params = self._parse_params(raw_dat)
+            experiment =  
+             
         f.close()
 
     def _concatenate(self, filenms):
@@ -38,6 +47,13 @@ class FBVis:
         fout.close()
 
         return out_name
+
+    def _load_properties(self):
+        with open('props.dat', 'r') as f:
+            props = [line.strip() for line in f]        
+        f.close()
+        
+        return props
 
     def _parse_params(self, raw_dat):
         """
