@@ -1,6 +1,4 @@
-import fileinput
-import glob
-import linecache
+import fileinput, glob
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -31,9 +29,10 @@ class FBVis:
         with open(concat_filenm, 'r') as f:
             raw_dat = f.readlines()
             params = self._parse_params(raw_dat)
+            exp_dat = self._parse_exp_dat(raw_dat)
         f.close()
 
-        return 0, params, 0
+        return 0, params, exp_dat
 
     def _concatenate(self, filenms):
         """
@@ -76,3 +75,33 @@ class FBVis:
                         # Reached end of parameter block            
                         parsed = True 
         return params        
+
+    def _parse_exp_dat(self, raw_dat):
+        exp_dat = {}
+        flag = 'Temperature  Pressure  Reference  Calculated +- Stdev'
+
+        for prop in self.properties:
+            for i, line in enumerate(raw_dat):
+                if prop in line and flag in raw_dat[i+1]:
+                    # Parse experimental data for prop
+                    parsed = False
+                    current = i + 3
+                    temp_dat = []
+
+                    while not parsed:
+                        fields = raw_dat[current].split()
+
+                        if fields[0][0].isdigit():
+                            T = float(fields[0])
+                            press = float(fields[1])
+                            ref = float(fields[3])
+                            temp_dat.append((T, press, ref))
+                            current += 1
+                        else:
+                            parsed = True
+
+                    exp_dat[prop] = temp_dat
+                    break
+        
+        return exp_dat
+
