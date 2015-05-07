@@ -25,14 +25,12 @@ class FBVis:
     def _parse(self, job_prefix):
         out_filenms = glob.glob('*.out')
         concat_filenm = self._concatenate(out_filenms)
-        
-        with open(concat_filenm, 'r') as f:
-            raw_dat = f.readlines()
-            params = self._parse_params(raw_dat)
-            exp_dat = self._parse_exp_dat(raw_dat)
-        f.close()
+        raw_dat = self._get_raw_dat()       
+        params = self._parse_params(raw_dat)
+        exp_dat = self._parse_exp_dat(raw_dat)
+        sim_dat = self._parse_sim_dat(raw_dat)
 
-        return 0, params, exp_dat
+        return sim_dat, params, exp_dat
 
     def _concatenate(self, filenms):
         """
@@ -105,3 +103,49 @@ class FBVis:
         
         return exp_dat
 
+    def _get_raw_dat(self):
+        out_file = open('compiled.out', 'r')
+        raw_dat = out_file.readlines()
+        out_file.close()
+        return raw_dat   
+
+    def param_deviations(self):
+        num_params = len(self.parameters)
+        step_file = open('param_steps.dat', 'w')
+        raw_dat = self._get_raw_dat()
+        step_line_idxs = [(i, line) for i, line in enumerate(raw_dat) if 'Physical Parameters (Current + Step = Next)' in line]
+        param_steps = []
+
+        for occur in step_line_idxs:
+            for l in raw_dat[occur[0]:(occur[0]+num_params+2)]:
+                param_steps.append(l)
+
+        param_labels = [elem[-1] for elem in self.parameters]
+        diffs = {}
+
+        for lab in param_labels:
+            # First field in key's value is the original paramater
+            # value. Second field is a list of percent differences.
+            diffs[lab] = [0, []]
+
+            for line in param_steps:
+                if lab in line and diffs[lab][0] == 0:
+                    fields = line.split()
+                    diffs[lab][0] = float(fields[2])
+                    diffs[lab][1].append(0.0)
+                elif lab in line:
+                    value = float(line.split()[2])
+                    diffs[lab][1].append((value - diffs[lab][0]) / diffs[lab][0] * 100)                    
+
+            plt.figure()
+            colors = plt.get_cmap('spectral')(np.linspace(0,1.0,num_params))
+
+            for k, color in zip(diffs.keys(), colors):
+                plt.plot(np.array(diffs[k][1]), '--o', label=k, color=color, linewidth=2, markersize=10) 
+                
+            plt.legend(loc=0)
+            plt.title('Parameter deviations from original values')
+            plt.xlabel('Iteration')
+            plt.ylabel('% difference from original')
+            plt.savefig('parameter_deviations.png', dpi=300)
+            plt.show()
