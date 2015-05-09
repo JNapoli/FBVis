@@ -139,7 +139,7 @@ class FBVis:
         out_file.close()
         return raw_dat   
 
-    def param_deviations(self):
+    def param_deviations(self, save=False):
         num_params = len(self.parameters)
         step_file = open('param_steps.dat', 'w')
         raw_dat = self._get_raw_dat()
@@ -176,6 +176,6 @@ class FBVis:
             plt.legend(loc=0)
             plt.title('Parameter deviations from original values')
             plt.xlabel('Iteration')
-            plt.ylabel('% difference from original')
-            plt.savefig('parameter_deviations.png', dpi=300)
+            plt.ylabel('% difference from original')            
+            if save: plt.savefig('parameter_deviations.png', dpi=300)
             plt.show()
