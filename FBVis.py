@@ -103,6 +103,36 @@ class FBVis:
         
         return exp_dat
 
+    def _parse_sim_dat(self, raw_dat):
+        sim_dat = {}
+        
+        for prop in self.properties:
+            sim_dat[prop] = []            
+
+            for i, line in enumerate(raw_dat):
+                flag = 'Liquid ' + prop + ' ' + units[prop]  
+                if flag in line:
+                    parsed = False
+                    current = i + 3
+                    temp_dat = []
+
+                    while not parsed:
+                        fields = raw_dat[current].split()
+                        
+                        if fields[0][0].isdigit():
+                            T = float(fields[0])
+                            press = float(fields[1])
+                            val = float(fields[4])
+                            err = float(fields[6])
+                            temp_dat.append((T, press, val, err))
+                            current += 1
+                        else:
+                            parsed = False
+
+                    sim_dat[prop].append(np.array(temp_dat))
+
+        return sim_dat
+        
     def _get_raw_dat(self):
         out_file = open('compiled.out', 'r')
         raw_dat = out_file.readlines()
