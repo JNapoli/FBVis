@@ -2,6 +2,7 @@ import fileinput, glob
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import seaborn as sns
 
 class FBVis:
     units = {'Density':'(kg m^-3)',
