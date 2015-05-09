@@ -179,3 +179,36 @@ class FBVis:
             plt.ylabel('% difference from original')            
             if save: plt.savefig('parameter_deviations.png', dpi=300)
             plt.show()
+
+    def iteration_data(self, iterations=[0,-1], save=False):
+        plt.figure()
+        colors = plt.get_cmap('spectral')(np.linspace(0,1.0,len(iterations)))        
+               
+        for prop in self.properties:
+            exp_dat = np.array(self.exp_dat[prop])
+            plt.plot(exp_dat[:,0], exp_dat[:,2], 'o', color='k', markersize=10, label='Experiment')
+            
+            for i, color in zip(iterations, colors):
+                plt.errorbar(self.sim_dat[prop][i][:,0], self.sim_dat[prop][i][:,2], yerr=self.sim_dat[prop][i][:,-1], fmt='o--', color=color, label='Iteration ' + str(i))
+
+            plt.legend(loc=0)
+            plt.title(prop + ' Optimization Progress')
+            plt.xlabel('Temp. (K)')
+            plt.ylabel(prop + ' ' + units[prop])
+            if save: plt.savefig(prop + '.png', dpi=300)
+            plt.show(block=True)
+
+
+
+
+
+
+
+             
+            
+
+
+
+
+
+
